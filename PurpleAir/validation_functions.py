@@ -72,7 +72,7 @@ def time_range(t_init, t_fin, file_path, time_path, name_loc):
                 print(file + 'not in range')
         else:
             print(file + 'is an empty file')
-            issue_count += 1
+            #issue_count += 1
             
             
 ### Only use files that have the PM2.5_CF_1_ug/m3 unit.
@@ -271,6 +271,7 @@ def Title_format(space_path, title_path, name_loc):
     
     for file in files:
         # Get sensor name from full file path.
+        print(file)
         path_split = file.split('\\') #replace with ('/') for MacOS
         sensor_name = path_split[name_loc] # Needs to be the correct position.
     
