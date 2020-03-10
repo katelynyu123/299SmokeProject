@@ -47,13 +47,14 @@ def time_range(t_init, t_fin, file_path, time_path, name_loc):
     # Create path to loop through.
     file_glob_path = file_path +'*' # add "+ '*.csv'" instead if files are in csv format 
     files = glob.glob(file_glob_path)
-    
+    t_init = pd.to_datetime(t_init)
+    t_fin = pd.to_datetime(t_fin)
     #issue_count = 0 # Number of files that did not contain range.
     for file in files: # Access files in Data_In_Box_No_Spaces.
         df = pd.read_csv(file) # Make Dataframe.
         df['created_at'] = pd.to_datetime(df['created_at'])
         if df.empty == False:
-            if df['created_at'].iloc[0] > t_init and df['created_at'].iloc[-1] < t_fin:
+            if df['created_at'].iloc[0] >= t_init and df['created_at'].iloc[-1] <= t_fin:
                 # Make a new file from the file with correct range.
                 # Make sure to not include files that if they don't have a corresponding channel.
                 # Might make more sense to do this first. Then run the two channel function.
@@ -274,32 +275,40 @@ def Title_format(space_path, title_path, name_loc):
         print(file)
         path_split = file.split('\\') #replace with ('/') for MacOS
         sensor_name = path_split[name_loc] # Needs to be the correct position.
-    
+
         # Extract lat and lon values from the title 
         latlon= sensor_name[sensor_name.rfind("(")+1:sensor_name.rfind(")")] #rfind finds from the end rather than beginning
         latlon = latlon.split(' ')
 
         lat = latlon[0]
         lon = latlon[1]
-        
+
         #Getting location alone + one space
         loc = sensor_name[0:sensor_name.find("(")]
-        
-        #Adding A or B and creating name to match original title format 
-        if "Primary" in sensor_name:
-            title = loc + "A_" + lat + '_' + lon
-        elif "Secondary" in sensor_name:
-            title = loc + "B_" + lat + '_' + lon
-        
-        t_name_path = title_path + title
 
-        # Write fixed title to  to Data_In_Box_TitleFormatted.
-        # Open original file.
-        orig = open(file, 'r')
-        new = open(t_name_path, 'w+')
-        # Write lines from original file into new file.
-        for line in orig:
-            new.write(line)
-        # Close files.
-        orig.close()
-        new.close()
+        #Adding A or B and creating name to match original title format 
+
+        df = pd.read_csv(file) # Make Dataframe
+        if df.empty == False:
+            if "Primary" in sensor_name:
+                title = loc + "A_" + lat + '_' + lon
+            elif "Secondary" in sensor_name:
+                title = loc + "B_" + lat + '_' + lon
+                
+            t_name_path = title_path + title
+
+            # Write fixed title to  to Data_In_Box_TitleFormatted.
+            # Open original file.
+            orig = open(file, 'r')
+            new = open(t_name_path, 'w+')
+            # Write lines from original file into new file.
+            for line in orig:
+                new.write(line)
+            # Close files.
+            orig.close()
+            new.close()
+        else:
+            print(file + 'is an empty file')
+
+        
+
